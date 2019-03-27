@@ -1,0 +1,2 @@
+class EmptyQueuePopException(Exception):
+    pass

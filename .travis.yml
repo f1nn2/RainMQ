@@ -1,0 +1,2 @@
+after_success:
+  - flake8 rainmq --import-order-style=smarkets --max-complexity 12 max-line-length=79
