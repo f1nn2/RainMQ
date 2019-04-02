@@ -2,17 +2,25 @@ from datetime import datetime
 from uuid import uuid4
 
 from sanic.request import Request
-from sanic.response import json, HTTPResponse
+from sanic.response import json, HTTPResponse, text
 
 from rainmq.services.broker import views
 
 
 async def produce_message(request: Request) -> HTTPResponse:
-    msg = await views.produce_message(
+    await views.produce_message(
         split_params(request), request.app.broker
     )
 
-    return json({'inserted_message': msg}, 200)
+    return text(201)
+
+
+async def bring_message(request: Request) -> HTTPResponse:
+    msg = await views.bring_message(
+        request.json['requester_ip'], request.app.broker
+    )
+
+    return json({'brought_message': msg}, 200)
 
 
 def split_params(request: Request) -> dict:
