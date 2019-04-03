@@ -1,11 +1,18 @@
 from sanic import Sanic
 from sanic.request import Request
-from sanic.response import text
+from sanic.response import text, HTTPResponse
 
 from rainmq.conf import Config, Testing, Development, Production
 from rainmq.http import init_router
-from rainmq.http.middlewares import set_security_headers
+from rainmq.http.middlewares import (
+    set_security_headers,
+    queue_exception_handler,
+)
 from rainmq.services.broker import Broker
+from rainmq.exceptions import (
+    BlockedByQueueException,
+    EmptyQueueException,
+)
 
 
 BEFORE_RESPONSE = 'response'
@@ -32,6 +39,9 @@ def check_env_type(config: Config):
 
 def init_middleware(app: Sanic) -> None:
     app.register_middleware(set_security_headers, BEFORE_RESPONSE)
+
+    app.error_handler.add(EmptyQueueException, queue_exception_handler)
+    app.error_handler.add(BlockedByQueueException, queue_exception_handler)
 
 
 def create_broker(app: Sanic) -> None:

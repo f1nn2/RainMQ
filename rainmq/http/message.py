@@ -17,7 +17,7 @@ async def produce_message(request: Request) -> HTTPResponse:
 
 async def bring_message(request: Request) -> HTTPResponse:
     msg = await views.bring_message(
-        request.json['requester_ip'], request.app.broker
+        f"{request.ip}:{request.port}", request.app.broker
     )
 
     return json({'brought_message': msg}, 200)
