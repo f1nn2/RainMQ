@@ -1,7 +1,7 @@
 from sanic.response import HTTPResponse
 from sanic.request import Request
 
-from rainmq.services.broker import SingleQueueBroker
+from rainmq.http.broker import SingleQueueBroker
 
 
 async def set_security_headers(

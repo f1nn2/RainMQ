@@ -4,7 +4,7 @@ from uuid import uuid4
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
 
-from rainmq.services.broker import SingleQueueBroker
+from rainmq.http.broker import SingleQueueBroker
 from rainmq.services import message as service
 
 

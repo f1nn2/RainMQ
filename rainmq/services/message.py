@@ -6,7 +6,7 @@ from rainmq.entities.message import Message
 from rainmq.exceptions import (
     EmptyQueueException
 )
-from rainmq.services.broker import Broker
+from rainmq.http.broker import Broker
 
 
 async def produce_message(
