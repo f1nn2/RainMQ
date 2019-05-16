@@ -1,5 +1,6 @@
-from collections import deque
 from abc import ABC, abstractmethod
+from collections import deque
+from typing import Dict
 
 
 from rainmq.entities.message import Message
@@ -30,26 +31,46 @@ class Broker(ABC):
 
     @classmethod
     @abstractmethod
-    async def push(cls, message: Message):
+    async def push(cls, message: Message, topic_name: str):
         ...
 
     @classmethod
     @abstractmethod
-    async def bring(cls) -> Message:
+    async def bring(cls, topic_name: str) -> Message:
+        ...
+
+
+class OneQueueTopicBroker(Broker):
+    __topics: Dict[str, MessageQueue] = {}
+
+    @classmethod
+    async def initialize(cls):
         ...
 
     @classmethod
-    @abstractmethod
-    async def get_front(cls) -> Message:
-        ...
+    async def _create_topic(cls, topic_name: str) -> MessageQueue:
+        cls.__topics[topic_name] = MessageQueue()
+        return cls.__topics[topic_name]
 
     @classmethod
-    @abstractmethod
-    async def is_empty(cls) -> bool:
-        ...
+    async def push(cls, message: Message, topic_name: str):
+        topic: MessageQueue
+        try:
+            topic = cls.__topics[topic_name]
+        except KeyError:
+            topic = await cls._create_topic(topic_name)
+        finally:
+            await topic._push(message)
+
+    @classmethod
+    async def bring(cls, topic_name: str) -> Message:
+        try:
+            return await cls.__topics[topic_name]._pop()
+        except (KeyError, IndexError) as exc:
+            raise exc
 
 
-class SingleQueueBroker(Broker):
+class SingleQueueBroker:
     __queue: MessageQueue = None
 
     @classmethod

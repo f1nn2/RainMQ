@@ -1,16 +1,18 @@
 from sanic import Sanic
 from sanic.request import Request
-from sanic.response import text, HTTPResponse
+from sanic.response import text
 
 from rainmq.conf import Config, Testing, Development, Production
 from rainmq.http import init_router
 from rainmq.http.middlewares import (
     set_security_headers,
-    queue_exception_handler,
+    no_contents_handler,
+    not_found_handler,
     initialize,
 )
 from rainmq.exceptions import (
     EmptyQueueException,
+    TopicNotFoundException
 )
 
 
@@ -42,7 +44,8 @@ def init_middleware(app: Sanic) -> None:
 
     app.register_middleware(set_security_headers, BEFORE_RESPONSE)
 
-    app.error_handler.add(EmptyQueueException, queue_exception_handler)
+    app.error_handler.add(EmptyQueueException, no_contents_handler)
+    app.error_handler.add(TopicNotFoundException, not_found_handler)
 
 
 def create_app() -> Sanic:

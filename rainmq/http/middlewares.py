@@ -1,3 +1,4 @@
+from sanic.exceptions import NotFound
 from sanic.response import HTTPResponse
 from sanic.request import Request
 
@@ -15,10 +16,16 @@ async def set_security_headers(
         return response
 
 
-async def queue_exception_handler(
+async def no_contents_handler(
     request: Request, exception
 ) -> HTTPResponse:
     return HTTPResponse(body=None, status=204)
+
+
+async def not_found_handler(
+    request: Request, exception
+) -> NotFound:
+    raise NotFound
 
 
 async def initialize(app, loop):
