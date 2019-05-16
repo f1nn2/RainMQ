@@ -8,8 +8,7 @@ class Message:
     id: str
 
     producer_url: str
-    consumer_url: str
-    original_method: str
+    http_method: str
 
     headers: Optional[dict]
     query_str: Optional[str]

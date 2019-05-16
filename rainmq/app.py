@@ -7,14 +7,14 @@ from rainmq.http import init_router
 from rainmq.http.middlewares import (
     set_security_headers,
     queue_exception_handler,
+    initialize,
 )
-from rainmq.services.broker import Broker
 from rainmq.exceptions import (
-    BlockedByQueueException,
     EmptyQueueException,
 )
 
 
+BEFORE_SERVER_START = 'before_server_start'
 BEFORE_RESPONSE = 'response'
 PING = 'ping'
 
@@ -38,14 +38,11 @@ def check_env_type(config: Config):
 
 
 def init_middleware(app: Sanic) -> None:
+    app.register_listener(initialize, BEFORE_SERVER_START)
+
     app.register_middleware(set_security_headers, BEFORE_RESPONSE)
 
     app.error_handler.add(EmptyQueueException, queue_exception_handler)
-    app.error_handler.add(BlockedByQueueException, queue_exception_handler)
-
-
-def create_broker(app: Sanic) -> None:
-    app.broker = Broker()
 
 
 def create_app() -> Sanic:
@@ -54,7 +51,6 @@ def create_app() -> Sanic:
     app_.config.from_object(init_config())
     init_middleware(app_)
     init_router(app_)
-    create_broker(app_)
 
     @app_.route('/')
     async def ping(_: Request):

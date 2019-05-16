@@ -1,6 +1,8 @@
 from sanic.response import HTTPResponse
 from sanic.request import Request
 
+from rainmq.services.broker import SingleQueueBroker
+
 
 async def set_security_headers(
     request: Request,
@@ -17,3 +19,7 @@ async def queue_exception_handler(
     request: Request, exception
 ) -> HTTPResponse:
     return HTTPResponse(body=None, status=204)
+
+
+async def initialize(app, loop):
+    await SingleQueueBroker.initialize()

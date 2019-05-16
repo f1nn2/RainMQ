@@ -2,23 +2,22 @@ from datetime import datetime
 from uuid import uuid4
 
 from sanic.request import Request
-from sanic.response import json, HTTPResponse, text
+from sanic.response import HTTPResponse, json
 
-from rainmq.services.broker import views
+from rainmq.services.broker import SingleQueueBroker
+from rainmq.services import message as service
 
 
 async def produce_message(request: Request) -> HTTPResponse:
-    await views.produce_message(
-        split_params(request), request.app.broker
+    await service.produce_message(
+        split_params(request), SingleQueueBroker
     )
 
-    return text(201)
+    return HTTPResponse(status=201)
 
 
 async def bring_message(request: Request) -> HTTPResponse:
-    msg = await views.bring_message(
-        f"{request.ip}:{request.port}", request.app.broker
-    )
+    msg = await service.bring_message(SingleQueueBroker)
 
     return json({'brought_message': msg}, 200)
 
@@ -29,16 +28,9 @@ def split_params(request: Request) -> dict:
     return {
         'id': str(uuid4()).replace('-', ''),
         'producer_url': f"{request.ip}:{request.port}",
-        'consumer_url': headers.pop('x-origin-receiver'),
-        'original_method': request.method,
+        'http_method': request.method,
         'headers': headers,
         'query_str': request.query_string or None,
         'json': request.json or None,
         'inserted_at': datetime.utcnow()
     }
-
-
-# Todo (temp check func. To be deleted)
-async def check_queue(request: Request):
-    print(request.app.broker._q1._queue)
-    return json({'current_queue': request.app.broker._q1._queue}, 200)
