@@ -1,7 +1,10 @@
+from sanic import Sanic
+from sanic.config import Config
 from sanic.exceptions import NotFound
 from sanic.response import HTTPResponse
 from sanic.request import Request
 
+from rainmq.data import MongoClient
 from rainmq.http.broker import SingleQueueBroker
 
 
@@ -28,5 +31,9 @@ async def not_found_handler(
     raise NotFound
 
 
-async def initialize(app, loop):
+async def initialize(app: Sanic, loop):
+    config: Config = app.config
     await SingleQueueBroker.initialize()
+    await MongoClient.initialize(
+        config['DATABASE_HOST'], config['DATABASE_NAME']
+    )

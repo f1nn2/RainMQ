@@ -10,12 +10,16 @@ class Config:
     TESTING: bool = False
     HOST: str = os.getenv('APP_HOST', '127.0.0.1')
     PORT: int = int(os.getenv('APP_PORT', 8080))
-    # db_host
+    DATABASE_HOST: str = 'mongodb://localhost:27017'
+    DATABASE_NAME: str = 'mq_logs'
 
 
 @dataclass(frozen=True)
 class Development(Config):
-    DEBUG: bool = False
+    env: str
+    DEBUG: bool = True
+    DATABASE_HOST = 'mongodb://localhost:27017'
+    DATABASE_NAME = 'mq_logs'
 
 
 @dataclass(frozen=True)
